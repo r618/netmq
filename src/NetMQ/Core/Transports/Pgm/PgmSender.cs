@@ -114,7 +114,7 @@ namespace NetMQ.Core.Transports.Pgm
             {
                 m_socket.Connect(m_pgmAddress.Address);
             }
-            catch (SocketException ex) when (ex.SocketErrorCode == SocketError.InvalidArgument)
+            catch (SocketException ex) // when (ex.SocketErrorCode == SocketError.InvalidArgument)
             {
                 Error();
             }

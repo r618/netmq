@@ -217,8 +217,8 @@ namespace NetMQ.Core.Patterns
         {
             if (!m_anonymousPipes.Remove(pipe))
             {
-
-                m_outpipes.TryGetValue(pipe.Identity, out Outpipe old);
+                Outpipe old;
+                m_outpipes.TryGetValue(pipe.Identity, out old);
                 m_outpipes.Remove(pipe.Identity);
 
                 Debug.Assert(old != null);
@@ -300,8 +300,8 @@ namespace NetMQ.Core.Patterns
                         ? msg.Data
                         : msg.CloneData();
 
-
-                    if (m_outpipes.TryGetValue(identity, out Outpipe op))
+                    Outpipe op;
+                    if (m_outpipes.TryGetValue(identity, out op))
                     {
                         m_currentOut = op.Pipe;
                         if (!m_currentOut.CheckWrite())
@@ -565,8 +565,8 @@ namespace NetMQ.Core.Patterns
                     identity = msg.CloneData();
                     msg.Close();
 
-
-                    if (m_outpipes.TryGetValue(identity, out Outpipe existPipe))
+                    Outpipe existPipe;
+                    if (m_outpipes.TryGetValue(identity, out existPipe))
                     {
                         if (!m_handover)
                         {

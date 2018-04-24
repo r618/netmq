@@ -9,8 +9,8 @@ namespace NetMQ
 {
     public sealed class NetMQQueueEventArgs<T> : EventArgs
     {
-        public NetMQQueueEventArgs(NetMQQueue<T> queue) => Queue = queue;
-        public NetMQQueue<T> Queue { get; }
+        public NetMQQueueEventArgs(NetMQQueue<T> queue) { Queue = queue; }
+        public NetMQQueue<T> Queue { get; private set; }
     }
 
     /// <summary>
@@ -57,12 +57,12 @@ namespace NetMQ
         /// </summary>
         public event EventHandler<NetMQQueueEventArgs<T>> ReceiveReady
         {
-            add => m_eventDelegator.Event += value;
-            remove => m_eventDelegator.Event -= value;
+            add { m_eventDelegator.Event += value; }
+            remove { m_eventDelegator.Event -= value; }
         }
 
-        NetMQSocket ISocketPollable.Socket => m_reader;
-        public bool IsDisposed { get; }
+        NetMQSocket ISocketPollable.Socket { get { return m_reader; } }
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Try to dequeue an item from the queue. Dequeueing and item is not thread safe.
@@ -91,7 +91,8 @@ namespace NetMQ
         {
             m_reader.TryReceive(ref m_dequeueMsg, SendReceiveConstants.InfiniteTimeout);
 
-            m_queue.TryDequeue(out T result);
+            T result;
+            m_queue.TryDequeue(out result);
 
             return result;
         }
@@ -115,7 +116,7 @@ namespace NetMQ
 
         #region IEnumerator
 
-        public IEnumerator<T> GetEnumerator() => m_queue.GetEnumerator();
+        public IEnumerator<T> GetEnumerator() { return m_queue.GetEnumerator(); }
 
         IEnumerator IEnumerable.GetEnumerator() { yield return GetEnumerator(); }
 

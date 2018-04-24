@@ -144,15 +144,15 @@ namespace NetMQ
 
         #region Creating Actor
 
+        void OnReceive(object sender, NetMQSocketEventArgs e) { m_receiveEvent.Fire(this, new NetMQActorEventArgs(this)); }
+        void OnSend(object sender, NetMQSocketEventArgs e) { m_sendEvent.Fire(this, new NetMQActorEventArgs(this)); }
+
         private NetMQActor(PairSocket self, PairSocket shim, [NotNull] IShimHandler shimHandler)
         {
             m_shimHandler = shimHandler;
 
             m_self = self;
             m_shim = shim;
-
-            void OnReceive(object sender, NetMQSocketEventArgs e) => m_receiveEvent.Fire(this, new NetMQActorEventArgs(this));
-            void OnSend   (object sender, NetMQSocketEventArgs e) => m_sendEvent   .Fire(this, new NetMQActorEventArgs(this));
 
             m_receiveEvent = new EventDelegator<NetMQActorEventArgs>(
                 () => m_self.ReceiveReady += OnReceive,
@@ -171,8 +171,8 @@ namespace NetMQ
             {
                 try
                 {
-                    actorName = $"NetMQActor-{random.Next(0, 10000)}-{random.Next(0, 10000)}";
-                    endPoint = $"inproc://{actorName}";
+                    actorName = string.Format("NetMQActor-{0}-{1}", random.Next(0, 10000), random.Next(0, 10000));
+                    endPoint = string.Format("inproc://{0}", actorName);
                     m_self.Bind(endPoint);
                     break;
                 }
@@ -285,8 +285,8 @@ namespace NetMQ
         /// </summary>
         public event EventHandler<NetMQActorEventArgs> ReceiveReady
         {
-            add => m_receiveEvent.Event += value;
-            remove => m_receiveEvent.Event -= value;
+            add { m_receiveEvent.Event += value; }
+            remove { m_receiveEvent.Event -= value; }
         }
 
         /// <summary>
@@ -294,11 +294,11 @@ namespace NetMQ
         /// </summary>
         public event EventHandler<NetMQActorEventArgs> SendReady
         {
-            add => m_sendEvent.Event += value;
-            remove => m_sendEvent.Event -= value;
+            add { m_sendEvent.Event += value; }
+            remove { m_sendEvent.Event -= value; }
         }
 
-        NetMQSocket ISocketPollable.Socket => m_self;
+        NetMQSocket ISocketPollable.Socket { get { return m_self; } }
 
         #endregion
 
@@ -333,7 +333,7 @@ namespace NetMQ
         }
 
         /// <inheritdoc />
-        public bool IsDisposed => m_isDisposed != 0;
+        public bool IsDisposed { get { return m_isDisposed != 0; } }
 
         #endregion
     }

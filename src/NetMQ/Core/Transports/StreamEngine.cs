@@ -239,8 +239,10 @@ namespace NetMQ.Core.Transports
             m_state = State.Closed;
 
             // Disconnect from session object.
-            m_encoder?.SetMsgSource(null);
-            m_decoder?.SetMsgSink(null);
+            if ( m_encoder != null)
+                m_encoder.SetMsgSource(null);
+            if (m_decoder != null)
+                m_decoder.SetMsgSink(null);
             m_session = null;
         }
 

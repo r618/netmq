@@ -162,9 +162,9 @@ namespace NetMQ
         /// <summary>
         /// Get the underlying <see cref="SocketBase"/>.
         /// </summary>
-        internal SocketBase SocketHandle => m_socketHandle;
+        internal SocketBase SocketHandle { get { return m_socketHandle; } }
 
-        NetMQSocket ISocketPollable.Socket => this;
+        NetMQSocket ISocketPollable.Socket { get { return this; } }
 
         #region Bind, Unbind, Connect, Disconnect, Close
 
@@ -338,10 +338,16 @@ namespace NetMQ
             m_socketEventArgs.Init(events);
 
             if (events.HasIn())
-                m_receiveReady?.Invoke(sender, m_socketEventArgs);
+            {
+                if ( m_receiveReady != null)
+                    m_receiveReady.Invoke(sender, m_socketEventArgs);
+            }
 
             if (events.HasOut())
-                m_sendReady?.Invoke(sender, m_socketEventArgs);
+            {
+                if ( m_sendReady != null)
+                    m_sendReady.Invoke(sender, m_socketEventArgs);
+            }
         }
 
         #endregion
@@ -392,9 +398,9 @@ namespace NetMQ
         public void Monitor([NotNull] string endpoint, SocketEvents events = SocketEvents.All)
         {
             if (endpoint == null)
-                throw new ArgumentNullException(nameof(endpoint));
+                throw new ArgumentNullException("endpoint");
             if (string.IsNullOrEmpty(endpoint))
-                throw new ArgumentException("Cannot be empty.", nameof(endpoint));
+                throw new ArgumentException("Cannot be empty.", "endpoint");
 
             m_socketHandle.CheckDisposed();
 
@@ -407,7 +413,7 @@ namespace NetMQ
         /// Get whether a message is waiting to be picked up (<c>true</c> if there is, <c>false</c> if there is none).
         /// </summary>
         /// <exception cref="TerminatingException">The socket has been stopped.</exception>
-        public bool HasIn => GetSocketOptionX<PollEvents>(ZmqSocketOption.Events).HasIn();
+        public bool HasIn { get { return GetSocketOptionX<PollEvents>(ZmqSocketOption.Events).HasIn(); } }
 
         /// <summary>
         /// Get whether a message is waiting to be sent.
@@ -416,7 +422,7 @@ namespace NetMQ
         /// This is <c>true</c> if at least one message is waiting to be sent, <c>false</c> if there is none.
         /// </remarks>
         /// <exception cref="TerminatingException">The socket has been stopped.</exception>
-        public bool HasOut => GetSocketOptionX<PollEvents>(ZmqSocketOption.Events).HasOut();
+        public bool HasOut { get { return GetSocketOptionX<PollEvents>(ZmqSocketOption.Events).HasOut(); } }
 
         /// <summary>
         /// Get the integer-value of the specified <see cref="ZmqSocketOption"/>.
@@ -529,7 +535,7 @@ namespace NetMQ
         }
 
         /// <inheritdoc />
-        public bool IsDisposed => m_isClosed != 0;
+        public bool IsDisposed { get { return m_isClosed != 0; } }
 
         #endregion
     }

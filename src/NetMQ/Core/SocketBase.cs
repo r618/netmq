@@ -46,8 +46,8 @@ namespace NetMQ.Core
                 Pipe = pipe;
             }
 
-            public Own Own { get; }
-            public Pipe Pipe { get; }
+            public Own Own { get; protected set; }
+            public Pipe Pipe { get; protected set; }
         }
 
         [NotNull] private readonly Dictionary<string, Endpoint> m_endpoints = new Dictionary<string, Endpoint>();
@@ -205,7 +205,7 @@ namespace NetMQ.Core
         /// Return the Mailbox associated with this socket.
         /// </summary>
         [NotNull]
-        public Mailbox Mailbox => m_mailbox;
+        public Mailbox Mailbox { get { return m_mailbox; } }
 
         /// <summary>
         /// Interrupt a blocking call if the socket is stuck in one.
@@ -419,8 +419,8 @@ namespace NetMQ.Core
             // Process pending commands, if any.
             ProcessCommands(0, false);
 
-
-            DecodeAddress(addr, out string address, out string protocol);
+            string address, protocol;
+            DecodeAddress(addr, out address, out protocol);
 
             CheckProtocol(protocol);
 
@@ -432,7 +432,7 @@ namespace NetMQ.Core
                         bool addressRegistered = RegisterEndpoint(addr, endpoint);
 
                         if (!addressRegistered)
-                            throw new AddressAlreadyInUseException($"Cannot bind address ( {addr} ) - already in use.");
+                            throw new AddressAlreadyInUseException(string.Format("Cannot bind address ( {0} ) - already in use.", addr));
 
                         m_options.LastEndpoint = addr;
                         return;
@@ -470,7 +470,7 @@ namespace NetMQ.Core
                             m_port = listener.Port;
 
                             // Recreate the address string (localhost:1234) in case the port was system-assigned
-                            addr = $"tcp://{address.Substring(0, address.IndexOf(':'))}:{m_port}";
+                            addr = string.Format("tcp://{0}:{1}", address.Substring(0, address.IndexOf(':')), m_port);
                         }
                         catch (NetMQException ex)
                         {
@@ -525,7 +525,7 @@ namespace NetMQ.Core
                     }
                 default:
                     {
-                        throw new ArgumentException($"Address {addr} has unsupported protocol: {protocol}", nameof(addr));
+                        throw new ArgumentException(string.Format("Address {0} has unsupported protocol: {1}", addr, protocol), "addr");
                     }
             }
         }
@@ -541,7 +541,8 @@ namespace NetMQ.Core
         /// <exception cref="FaultException">the socket bind failed</exception>
         public int BindRandomPort([NotNull] string addr)
         {
-            DecodeAddress(addr, out string address, out string protocol);
+            string address, protocol;
+            DecodeAddress(addr, out address, out protocol);
 
             if (protocol != Address.TcpProtocol)
                 throw new ProtocolNotSupportedException("Address must use the TCP protocol.");
@@ -571,7 +572,8 @@ namespace NetMQ.Core
             // Process pending commands, if any.
             ProcessCommands(0, false);
 
-            DecodeAddress(addr, out string address, out string protocol);
+            string address, protocol;
+            DecodeAddress(addr, out address, out protocol);
 
             CheckProtocol(protocol);
 
@@ -761,14 +763,14 @@ namespace NetMQ.Core
 
             // Check whether endpoint address passed to the function is valid.
             if (addr == null)
-                throw new ArgumentNullException(nameof(addr));
+                throw new ArgumentNullException("addr");
 
             // Process pending commands, if any, since there could be pending unprocessed process_own()'s
             //  (from launch_child() for example) we're asked to terminate now.
             ProcessCommands(0, false);
 
-
-            DecodeAddress(addr, out string address, out string protocol);
+            string address, protocol;
+            DecodeAddress(addr, out address, out protocol);
 
             CheckProtocol(protocol);
 
@@ -777,7 +779,8 @@ namespace NetMQ.Core
                 if (UnregisterEndpoint(addr, this))
                     return;
 
-                if (!m_inprocs.TryGetValue(addr, out Pipe pipe))
+                Pipe pipe;
+                if (!m_inprocs.TryGetValue(addr, out pipe))
                     throw new EndpointNotFoundException("Endpoint was not found and cannot be disconnected");
 
                 pipe.Terminate(true);
@@ -785,10 +788,12 @@ namespace NetMQ.Core
             }
             else
             {
-                if (!m_endpoints.TryGetValue(addr, out Endpoint endpoint))
+                Endpoint endpoint;
+                if (!m_endpoints.TryGetValue(addr, out endpoint))
                     throw new EndpointNotFoundException("Endpoint was not found and cannot be disconnected");
 
-                endpoint.Pipe?.Terminate(false);
+                if (endpoint.Pipe != null)
+                    endpoint.Pipe.Terminate(false);
 
                 TermChild(endpoint.Own);
                 m_endpoints.Remove(addr);
@@ -1348,13 +1353,14 @@ namespace NetMQ.Core
                 return;
             }
 
-            DecodeAddress(addr, out string address, out string protocol);
+            string address, protocol;
+            DecodeAddress(addr, out address, out protocol);
 
             CheckProtocol(protocol);
 
             // Event notification only supported over inproc://
             if (protocol != Address.InProcProtocol)
-                throw new ProtocolNotSupportedException($"In SocketBase.Monitor({addr},), protocol must be inproc");
+                throw new ProtocolNotSupportedException(string.Format("In SocketBase.Monitor({0},), protocol must be inproc", addr));
 
             // Register events to monitor
             m_monitorEvents = events;
@@ -1504,7 +1510,7 @@ namespace NetMQ.Core
         /// Get the Socket (Handle) - which is actually the Handle of the contained mailbox.
         /// </summary>
         [NotNull]
-        public Socket Handle => m_mailbox.Handle;
+        public Socket Handle { get { return m_mailbox.Handle; } }
 
         /// <summary>
         /// Return a short bit of text that denotes the SocketType of this socket.

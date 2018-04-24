@@ -169,7 +169,8 @@ namespace NetMQ.Core.Transports.Pgm
             m_ioObject.Unplug();
 
             // Disconnect from session object.
-            m_decoder?.SetMsgSink(null);
+            if (m_decoder != null)
+                m_decoder.SetMsgSink(null);
 
             m_session = null;
 

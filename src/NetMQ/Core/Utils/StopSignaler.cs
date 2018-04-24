@@ -24,9 +24,9 @@ namespace NetMQ.Core.Utils
 
         public bool IsStopRequested { get; private set; }
 
-        NetMQSocket ISocketPollable.Socket => m_reader;
+        NetMQSocket ISocketPollable.Socket { get { return m_reader; } }
 
-        public bool IsDisposed => m_isDisposed != 0;
+        public bool IsDisposed { get { return m_isDisposed != 0; } }
 
         public void Dispose()
         {

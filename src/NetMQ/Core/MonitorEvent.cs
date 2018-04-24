@@ -60,16 +60,18 @@ namespace NetMQ.Core
         }
 
         [NotNull]
-        public string Addr => m_addr;
+        public string Addr { get { return m_addr; } }
 
         [NotNull]
-        public object Arg => m_arg;
+        public object Arg { get { return m_arg; } }
 
-        public SocketEvents Event => m_monitorEvent;
+        public SocketEvents Event { get { return m_monitorEvent; } }
 
         public void Write([NotNull] SocketBase s)
         {
-            int size = 4 + 1 + (m_addr?.Length ?? 0) + 1; // event + len(addr) + addr + flag
+            // (m_addr?.Length ?? 0)
+            var l = m_addr != null ? m_addr.Length : 0;
+            int size = 4 + 1 + l + 1; // event + len(addr) + addr + flag
 
             if (m_flag == ValueInteger)
                 size += 4;

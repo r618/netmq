@@ -33,7 +33,8 @@ namespace NetMQ
         public void Dispose()
         {
             m_actor.Dispose();
-            m_poller?.Dispose();
+            if (m_poller != null)
+                m_poller.Dispose();
         }
 
         private void Run(PairSocket shim)

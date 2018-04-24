@@ -55,22 +55,26 @@ namespace NetMQ.Sockets
             {
                 using (var requestSocket = new RequestSocket(address))
                 {
-                    progressPublisher?.SendFrame(ProgressTopic.Send.ToString());
+                    if (progressPublisher != null)
+                        progressPublisher.SendFrame(ProgressTopic.Send.ToString());
 
                     requestSocket.SendMultipartMessage(requestMessage);
 
                     if (requestSocket.TryReceiveMultipartMessage(requestTimeout, ref responseMessage))
                     {
-                        progressPublisher?.SendFrame(ProgressTopic.Success.ToString());
+                        if (progressPublisher != null)
+                            progressPublisher.SendFrame(ProgressTopic.Success.ToString());
 
                         return responseMessage;
                     }
 
-                    progressPublisher?.SendFrame(ProgressTopic.Retry.ToString());
+                    if (progressPublisher != null)
+                        progressPublisher.SendFrame(ProgressTopic.Retry.ToString());
                 }
             }
 
-            progressPublisher?.SendFrame(ProgressTopic.Failure.ToString());
+            if (progressPublisher != null)
+                progressPublisher.SendFrame(ProgressTopic.Failure.ToString());
 
             return null;
         }
@@ -91,22 +95,27 @@ namespace NetMQ.Sockets
             {
                 using (var requestSocket = new RequestSocket(address))
                 {
-                    progressPublisher?.SendFrame(ProgressTopic.Send.ToString());
+                    if (progressPublisher != null)
+                        progressPublisher.SendFrame(ProgressTopic.Send.ToString());
 
                     requestSocket.SendFrame(requestString);
 
-                    if (requestSocket.TryReceiveFrameString(requestTimeout, out string frameString))
+                    string frameString;
+                    if (requestSocket.TryReceiveFrameString(requestTimeout, out frameString))
                     {
-                        progressPublisher?.SendFrame(ProgressTopic.Success.ToString());
+                        if (progressPublisher != null)
+                            progressPublisher.SendFrame(ProgressTopic.Success.ToString());
 
                         return frameString;
                     }
 
-                    progressPublisher?.SendFrame(ProgressTopic.Retry.ToString());
+                    if (progressPublisher != null)
+                        progressPublisher.SendFrame(ProgressTopic.Retry.ToString());
                 }
             }
 
-            progressPublisher?.SendFrame(ProgressTopic.Failure.ToString());
+            if (progressPublisher != null)
+                progressPublisher.SendFrame(ProgressTopic.Failure.ToString());
 
             return null;
         }

@@ -98,7 +98,7 @@ namespace NetMQ.Core.Utils
         // to pass the signals.
 
         [NotNull]
-        public Socket Handle => m_readSocket;
+        public Socket Handle { get { return m_readSocket; } }
 
         public void Send()
         {

@@ -198,7 +198,8 @@ namespace NetMQ.Core
             }
 
             // Close the engine.
-            m_engine?.Terminate();
+            if (m_engine != null)
+                m_engine.Terminate();
         }
 
         /// <summary>
@@ -296,7 +297,8 @@ namespace NetMQ.Core
         /// </summary>
         public void Flush()
         {
-            m_pipe?.Flush();
+            if ( m_pipe != null)
+                m_pipe.Flush();
         }
 
         /// <summary>
@@ -390,7 +392,8 @@ namespace NetMQ.Core
                 return;
             }
 
-            m_engine?.ActivateIn();
+            if (m_engine != null)
+                m_engine.ActivateIn();
         }
 
         public void Hiccuped(Pipe pipe)
@@ -404,7 +407,7 @@ namespace NetMQ.Core
         /// Get the contained socket.
         /// </summary>
         [NotNull]
-        public SocketBase Socket => m_socket;
+        public SocketBase Socket { get { return m_socket; } }
 
         /// <summary>
         /// Process the Plug-request by setting this SessionBase as the handler for the io-object
@@ -467,7 +470,8 @@ namespace NetMQ.Core
             Detached();
 
             // Just in case there's only a delimiter in the pipe.
-            m_pipe?.CheckRead();
+            if (m_pipe != null)
+                m_pipe.CheckRead();
         }
 
         /// <summary>

@@ -136,7 +136,8 @@ namespace NetMQ
                     m_udpSocket.Bind(new IPEndPoint(bindTo, m_udpPort));
                 }
 
-                m_pipe.SendFrame(bindTo?.ToString() ?? "");
+                // bindTo?.ToString() ?? ""
+                m_pipe.SendFrame(bindTo != null ? bindTo.ToString() : "");
             }
 
             private static bool Compare([NotNull] NetMQFrame a, [NotNull] NetMQFrame b, int size)
@@ -169,9 +170,11 @@ namespace NetMQ
 
                 // the beacon might never been configured
 #if NET35
-                m_udpSocket?.Close();
+                if ( m_udpSocket != null)
+                    m_udpSocket.Close();
 #else
-                m_udpSocket?.Dispose();
+                if (m_udpSocket != null)
+                    m_udpSocket.Dispose();
 #endif
             }
 
@@ -182,10 +185,11 @@ namespace NetMQ
 
             private void OnUdpReady(Socket socket)
             {
-                var frame = ReceiveUdpFrame(out string peerName);
+                string peerName;
+                var frame = ReceiveUdpFrame(out peerName);
 
                 // If filter is set, check that beacon matches it
-                var isValid = frame.MessageSize >= m_filter?.MessageSize && Compare(frame, m_filter, m_filter.MessageSize);
+                var isValid = m_filter != null ? frame.MessageSize >= m_filter.MessageSize && Compare(frame, m_filter, m_filter.MessageSize) : false;
 
                 // If valid, discard our own broadcasts, which UDP echoes to us
                 if (isValid && m_transmit != null)
@@ -279,14 +283,14 @@ namespace NetMQ
         [CanBeNull] private string m_hostName;
         private int m_isDisposed;
 
+        void OnReceive(object sender, NetMQActorEventArgs e) { m_receiveEvent.Fire(this, new NetMQBeaconEventArgs(this)); }
+        
         /// <summary>
         /// Create a new NetMQBeacon.
         /// </summary>
         public NetMQBeacon()
         {
             m_actor = NetMQActor.Create(new Shim());
-
-            void OnReceive(object sender, NetMQActorEventArgs e) => m_receiveEvent.Fire(this, new NetMQBeaconEventArgs(this));
 
             m_receiveEvent = new EventDelegator<NetMQBeaconEventArgs>(
                 () => m_actor.ReceiveReady += OnReceive,
@@ -341,20 +345,20 @@ namespace NetMQ
         /// <summary>
         /// Get the IP address this beacon is bound to.
         /// </summary>
-        public string BoundTo => m_boundTo;
+        public string BoundTo { get { return m_boundTo; } }
 
         /// <summary>
         /// Get the socket of the contained actor.
         /// </summary>
-        NetMQSocket ISocketPollable.Socket => ((ISocketPollable)m_actor).Socket;
+        NetMQSocket ISocketPollable.Socket { get { return ((ISocketPollable)m_actor).Socket; } }
 
         /// <summary>
         /// This event occurs when at least one message may be received from the socket without blocking.
         /// </summary>
         public event EventHandler<NetMQBeaconEventArgs> ReceiveReady
         {
-            add => m_receiveEvent.Event += value;
-            remove => m_receiveEvent.Event -= value;
+            add { m_receiveEvent.Event += value; }
+            remove { m_receiveEvent.Event -= value; }
         }
 
         /// <summary>
@@ -479,7 +483,8 @@ namespace NetMQ
         /// <returns><c>true</c> if a beacon message was received, otherwise <c>false</c>.</returns>
         public bool TryReceive(TimeSpan timeout, out BeaconMessage message)
         {
-            if (!m_actor.TryReceiveFrameString(timeout, out string peerName))
+            string peerName;
+            if (!m_actor.TryReceiveFrameString(timeout, out peerName))
             {
                 message = default(BeaconMessage);
                 return false;
@@ -501,7 +506,7 @@ namespace NetMQ
         }
 
         /// <inheritdoc />
-        public bool IsDisposed => m_isDisposed != 0;
+        public bool IsDisposed { get { return m_isDisposed != 0; } }
     }
 
     /// <summary>
@@ -529,7 +534,7 @@ namespace NetMQ
         /// The beacon content as a string.
         /// </summary>
         /// <remarks>Decoded using <see cref="Encoding.UTF8"/>. Other encodings may be used with <see cref="Bytes"/> directly.</remarks>
-        public string String => Encoding.UTF8.GetString(Bytes);
+        public string String { get { return Encoding.UTF8.GetString(Bytes); } }
 
         /// <summary>
         /// The host name of the peer that sent this message.

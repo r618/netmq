@@ -92,7 +92,7 @@ namespace NetMQ.Core
         /// Get the Mailbox that this Reaper uses for communication with the rest of the message-queueing subsystem.
         /// </summary>
         [NotNull]
-        public Mailbox Mailbox => m_mailbox;
+        public Mailbox Mailbox { get { return m_mailbox; } }
 
         /// <summary>
         /// Start the contained Poller to begin polling.
@@ -125,7 +125,8 @@ namespace NetMQ.Core
             while (true)
             {
                 // Get the next command. If there is none, exit.
-                if (!m_mailbox.TryRecv(0, out Command command))
+                Command command;
+                if (!m_mailbox.TryRecv(0, out command))
                     break;
 
                 // Process the command.

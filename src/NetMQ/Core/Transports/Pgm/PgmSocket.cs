@@ -94,7 +94,7 @@ namespace NetMQ.Core.Transports.Pgm
             }
             catch (SocketException x)
             {
-                string xMsg = $"SocketException with SocketErrorCode={x.SocketErrorCode}, Message={x.Message}, in PgmSocket.Init, within AsyncSocket.Create(AddressFamily.InterNetwork, SocketType.Rdm, PGM_PROTOCOL_TYPE), {this}";
+                string xMsg = string.Format("SocketException with SocketErrorCode={0}, Message={1}, in PgmSocket.Init, within AsyncSocket.Create(AddressFamily.InterNetwork, SocketType.Rdm, PGM_PROTOCOL_TYPE), {2}", x.SocketErrorCode, x.Message, this);
                 Debug.WriteLine(xMsg);
                 // If running on Microsoft Windows, suggest to the developer that he may need to install MSMQ in order to get PGM socket support.
 

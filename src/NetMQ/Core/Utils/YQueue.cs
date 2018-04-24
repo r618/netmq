@@ -94,7 +94,7 @@ namespace NetMQ.Core.Utils
         public YQueue(int chunkSize)
         {
             if (chunkSize < 2)
-                throw new ArgumentOutOfRangeException(nameof(chunkSize), "Should be no less than 2");
+                throw new ArgumentOutOfRangeException("chunkSize", "Should be no less than 2");
 
             m_chunkSize = chunkSize;
 
@@ -109,16 +109,16 @@ namespace NetMQ.Core.Utils
         /// <summary>Gets the index of the front element of the queue.</summary>
         /// <value>The index of the front element of the queue.</value>
         /// <remarks>If the queue is empty, it should be equal to <see cref="BackPos"/>.</remarks>
-        public int FrontPos => m_beginChunk.GlobalOffset + m_beginPositionInChunk;
+        public int FrontPos { get { return m_beginChunk.GlobalOffset + m_beginPositionInChunk; } }
 
         /// <summary>Gets the front element of the queue. If the queue is empty, behaviour is undefined.</summary>
         /// <value>The front element of the queue.</value>
-        public T Front => m_beginChunk.Values[m_beginPositionInChunk];
+        public T Front { get { return m_beginChunk.Values[m_beginPositionInChunk]; } }
 
         /// <summary>Gets the index of the back element of the queue.</summary>
         /// <value>The index of the back element of the queue.</value>
         /// <remarks>If the queue is empty, it should be equal to <see cref="FrontPos"/>.</remarks>
-        public int BackPos => m_backChunk.GlobalOffset + m_backPositionInChunk;
+        public int BackPos { get { return m_backChunk.GlobalOffset + m_backPositionInChunk; } }
 
         /// <summary>Retrieves the element at the front of the queue.</summary>
         /// <returns>The element taken from queue.</returns>

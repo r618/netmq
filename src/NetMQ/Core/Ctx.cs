@@ -211,7 +211,8 @@ namespace NetMQ.Core
                 }
 
                 // Wait till reaper thread closes all the sockets.
-                var found = m_termMailbox.TryRecv(-1, out Command command);
+                Command command;
+                var found = m_termMailbox.TryRecv(-1, out command);
 
                 Debug.Assert(found);
                 Debug.Assert(command.CommandType == CommandType.Done);
@@ -226,18 +227,19 @@ namespace NetMQ.Core
             foreach (IOThread it in m_ioThreads)
                 it.Destroy();
 
-            m_reaper?.Destroy();
+            if (m_reaper != null)
+                m_reaper.Destroy();
 
             m_termMailbox.Close();
         }
 
         public int IOThreadCount
         {
-            get => m_ioThreadCount;
+            get { return m_ioThreadCount; }
             set
             {
                 if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "Must be zero or greater");
+                    throw new ArgumentOutOfRangeException("IOThreadCount", value, "Must be zero or greater");
                 lock (m_optSync)
                     m_ioThreadCount = value;
             }
@@ -245,11 +247,11 @@ namespace NetMQ.Core
 
         public int MaxSockets
         {
-            get => m_maxSockets;
+            get { return m_maxSockets; }
             set
             {
                 if (value <= 0)
-                    throw new ArgumentOutOfRangeException(nameof(value), value, "Must be greater than zero");
+                    throw new ArgumentOutOfRangeException("MaxSockets", value, "Must be greater than zero");
                 lock (m_optSync)
                     m_maxSockets = value;
             }
@@ -316,7 +318,7 @@ namespace NetMQ.Core
                 // Once zmq_term() was called, we can't create new sockets.
                 if (m_terminating)
                 {
-                    string xMsg = $"Ctx.CreateSocket({type}), cannot create new socket while terminating.";
+                    string xMsg = string.Format("Ctx.CreateSocket({0}), cannot create new socket while terminating.", type);
                     throw new TerminatingException(innerException: null, message: xMsg);
                 }
 
@@ -324,7 +326,7 @@ namespace NetMQ.Core
                 if (m_emptySlots.Count == 0)
                 {
 #if DEBUG
-                    string xMsg = $"Ctx.CreateSocket({type}), max number of sockets {m_maxSockets} reached.";
+                    string xMsg = string.Format("Ctx.CreateSocket({0}), max number of sockets {1} reached.", type, m_maxSockets);
                     throw NetMQException.Create(xMsg, ErrorCode.TooManyOpenSockets);
 #else
                     throw NetMQException.Create(ErrorCode.TooManyOpenSockets);
@@ -455,8 +457,8 @@ namespace NetMQ.Core
         {
             lock (m_endpointsSync)
             {
-
-                if (!m_endpoints.TryGetValue(address, out Endpoint endpoint))
+                Endpoint endpoint;
+                if (!m_endpoints.TryGetValue(address, out endpoint))
                     return false;
 
                 if (socket != endpoint.Socket)

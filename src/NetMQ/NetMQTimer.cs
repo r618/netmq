@@ -85,7 +85,7 @@ namespace NetMQ
         /// </remarks>
         public int Interval
         {
-            get => m_interval;
+            get { return m_interval; }
             set
             {
                 m_interval = value;
@@ -102,7 +102,7 @@ namespace NetMQ
         /// </remarks>
         public bool Enable
         {
-            get => m_enable;
+            get { return m_enable; }
             set
             {
                 if (m_enable == value)
@@ -136,7 +136,8 @@ namespace NetMQ
         /// <param name="sender">the sender to include within the event's event-args</param>
         internal void InvokeElapsed(object sender)
         {
-            Elapsed?.Invoke(sender, m_timerEventArgs);
+            if (Elapsed != null)
+                Elapsed.Invoke(sender, m_timerEventArgs);
         }
     }
 }

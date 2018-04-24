@@ -38,9 +38,9 @@ namespace NetMQ
                 Event = @event;
             }
 
-            public Socket FileDescriptor { get; }
-            public NetMQSocket Socket { get; }
-            public PollEvents Event { get; }
+            public Socket FileDescriptor { get; private set; }
+            public NetMQSocket Socket { get; private set; }
+            public PollEvents Event { get; private set; }
             public PollEvents ResultEvent { get; set; }
         }
 
@@ -57,7 +57,7 @@ namespace NetMQ
         public bool Select([NotNull] Item[] items, int itemsCount, long timeout)
         {
             if (items == null)
-                throw new ArgumentNullException(nameof(items));
+                throw new ArgumentNullException("items");
 
             if (itemsCount == 0)
                 return false;
@@ -127,7 +127,7 @@ namespace NetMQ
                     string textOfListRead = StringLib.AsString(m_checkRead);
                     string textOfListWrite = StringLib.AsString(m_checkWrite);
                     string textOfListError = StringLib.AsString(m_checkError);
-                    string xMsg = $"In Selector.Select, Socket.Select({textOfListRead}, {textOfListWrite}, {textOfListError}, {currentTimeoutMicroSeconds}) threw a SocketException: {x.Message}";
+                    string xMsg = string.Format("In Selector.Select, Socket.Select({0}, {1}, {2}, {3}) threw a SocketException: {4}", textOfListRead, textOfListWrite, textOfListError, currentTimeoutMicroSeconds, x.Message);
                     Debug.WriteLine(xMsg);
                     throw new FaultException(innerException: x, message: xMsg);
 #else

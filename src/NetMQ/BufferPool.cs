@@ -183,8 +183,8 @@ namespace NetMQ
         public static void SetCustomBufferPool([NotNull] IBufferPool bufferPool)
         {
             var prior = Interlocked.Exchange(ref s_bufferPool, bufferPool);
-
-            prior?.Dispose();
+            if (prior != null)
+                prior.Dispose();
         }
 
         /// <summary>

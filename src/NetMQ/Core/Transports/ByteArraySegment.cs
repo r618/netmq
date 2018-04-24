@@ -58,7 +58,7 @@ namespace NetMQ.Core.Transports
         /// <summary>
         /// Get the number of bytes within the buffer that is past the Offset (ie, buffer-length minus offset).
         /// </summary>
-        public int Size => m_innerBuffer.Length - Offset;
+        public int Size { get { return m_innerBuffer.Length - Offset; } }
 
         /// <summary>
         /// Add the given value to the offset.
@@ -347,8 +347,8 @@ namespace NetMQ.Core.Transports
         /// <param name="i">the index of the byte to access</param>
         public byte this[int i]
         {
-            get => m_innerBuffer[i + Offset];
-            set => m_innerBuffer[i + Offset] = value;
+            get { return m_innerBuffer[i + Offset]; }
+            set { m_innerBuffer[i + Offset] = value; }
         }
 
         /// <summary>

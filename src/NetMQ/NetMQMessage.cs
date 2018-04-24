@@ -49,7 +49,7 @@ namespace NetMQ
         public NetMQMessage([NotNull] IEnumerable<NetMQFrame> frames)
         {
             if (frames == null)
-                throw new ArgumentNullException(nameof(frames));
+                throw new ArgumentNullException("frames");
 
             m_frames = new List<NetMQFrame>(frames);
         }
@@ -62,7 +62,7 @@ namespace NetMQ
         public NetMQMessage([NotNull] IEnumerable<byte[]> buffers)
         {
             if (buffers == null)
-                throw new ArgumentNullException(nameof(buffers));
+                throw new ArgumentNullException("buffers");
 
             m_frames = buffers.Select(buf => new NetMQFrame(buf)).ToList();
         }
@@ -75,23 +75,23 @@ namespace NetMQ
         /// Gets the first frame in the current message.
         /// </summary>
         [NotNull]
-        public NetMQFrame First => m_frames[0];
+        public NetMQFrame First { get { return m_frames[0]; } }
 
         /// <summary>
         /// Gets the last frame in the current message.
         /// </summary>
         [NotNull]
-        public NetMQFrame Last => m_frames[m_frames.Count - 1];
+        public NetMQFrame Last { get { return m_frames[m_frames.Count - 1]; } }
 
         /// <summary>
         /// Gets a value indicating whether the current message is empty.
         /// </summary>
-        public bool IsEmpty => m_frames.Count == 0;
+        public bool IsEmpty { get { return m_frames.Count == 0; } }
 
         /// <summary>
         /// Gets the number of <see cref="NetMQFrame"/> objects contained by this message.
         /// </summary>
-        public int FrameCount => m_frames.Count;
+        public int FrameCount { get { return m_frames.Count; } }
 
         /// <summary>
         /// Gets the <see cref="NetMQFrame"/> at the specified index.
@@ -102,7 +102,7 @@ namespace NetMQ
         /// <paramref name="index"/>is less than 0 -or- <paramref name="index"/> is equal to or greater than <see cref="FrameCount"/>.
         /// </exception>
         [NotNull]
-        public NetMQFrame this[int index] => m_frames[index];
+        public NetMQFrame this[int index] { get { return m_frames[index]; } }
 
         #endregion
 
